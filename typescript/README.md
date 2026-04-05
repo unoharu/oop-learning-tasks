@@ -52,7 +52,7 @@ npx ts-node answers/step1-task.ts
 
 ## Step 1　Taskクラスを作る
 
-### 学ぶ概念
+### Step 1 学ぶ概念
 
 - **クラス** — データ（プロパティ）と処理（メソッド）をひとまとめにした設計図
 - **インスタンス** — クラスから `new` で作った実体
@@ -133,7 +133,7 @@ task.display(); // [完了] 買い物（期日: 2024-12-31）
 
 ---
 
-### 構文リファレンス
+### Step 1 構文リファレンス
 
 #### クラス定義
 
@@ -176,7 +176,7 @@ complete(): void {
 
 ---
 
-### 問題
+### Step 1 問題
 
 `src/step1-task.ts` を開いて、TODOコメントに従って `Task` クラスを実装してください。
 
@@ -188,7 +188,7 @@ npm run step1
 
 ---
 
-### 答え合わせ
+### Step 1 答え合わせ
 
 実装後に `answers/step1-task.ts` と比較してください。
 コメントには「なぜそう書いたか」の設計意図が書いてあります。
@@ -201,7 +201,7 @@ npm run answer1
 
 ## Step 2　型とアクセス修飾子を使う
 
-### 学ぶ概念
+### Step 2 学ぶ概念
 
 - **アクセス修飾子** — プロパティやメソッドへのアクセス範囲を制限するキーワード
 - **カプセル化** — データを外部から守り、決まった方法でしか操作できないようにする設計
@@ -256,7 +256,7 @@ task.complete();          // OK: メソッド経由で completed を変更でき
 
 ---
 
-### 構文リファレンス
+### Step 2 構文リファレンス
 
 #### TypeScript のショートハンド構文
 
@@ -284,7 +284,7 @@ class Task {
 
 ---
 
-### 問題
+### Step 2 問題
 
 `src/step2-access.ts` を開いて、TODOコメントに従って型とアクセス修飾子を追加してください。
 
@@ -296,10 +296,108 @@ npm run step2
 
 ---
 
-### 答え合わせ
+### Step 2 答え合わせ
 
 実装後に `answers/step2-access.ts` と比較してください。
 
 ```bash
 npm run answer2
+```
+
+---
+
+## Step 3　getter / setter を実装する
+
+### Step 3 学ぶ概念
+
+- **getter** — プロパティのように見えるが、呼ばれるたびに値を計算して返せる読み取り専用の窓口
+- **setter** — プロパティへの書き込みにバリデーションを挟める書き込み口
+- **バリデーション** — 不正な値・状態変化を事前に弾く処理
+
+---
+
+### なぜ getter / setter が必要か
+
+Step 2で `completed` を `private` にしましたが、このままでは外部から値を読めません。かといって `public` に戻すと自由に書き換えられてしまいます。
+
+getter / setter を使うと「読めるが、書き込みは制御する」という細かい制御が可能になります。
+
+```typescript
+// private だと外部から読めない
+const task = new Task("買い物", "2024-12-31");
+console.log(task.completed); // エラー: プロパティ 'completed' はプライベートです
+
+// getter を使うと読み取り専用で公開できる
+get completed(): boolean {
+  return this._completed;
+}
+console.log(task.completed); // OK: 読めるようになる
+task.completed = false;      // setter がなければ書き込みはエラーになる
+```
+
+---
+
+### getter / setter の構文
+
+```typescript
+class Task {
+  private _completed: boolean = false;
+  // private プロパティに _ をつけるのは getter / setter と名前が衝突しないようにするため
+
+  // getter: task.completed と書くだけで呼び出せる
+  get completed(): boolean {
+    return this._completed;
+  }
+
+  // setter: task.completed = true と書くと呼び出される
+  set completed(value: boolean) {
+    // ここでバリデーションを挟める
+    this._completed = value;
+  }
+}
+
+const task = new Task();
+console.log(task.completed); // getter が呼ばれる
+task.completed = true;       // setter が呼ばれる
+```
+
+#### バリデーションの追加
+
+setter の中で条件をチェックし、不正な場合は `Error` をスローします。
+
+```typescript
+set completed(value: boolean) {
+  if (this._completed && !value) {
+    throw new Error("完了済みのタスクを未完了に戻すことはできません");
+  }
+  this._completed = value;
+}
+```
+
+呼び出し側では `try / catch` でエラーを受け取れます。
+
+```typescript
+try {
+  task.completed = false;
+} catch (e) {
+  console.log((e as Error).message);
+}
+```
+
+---
+
+### Step 3 問題
+
+`src/step3-getter-setter.ts` を開いて、TODOコメントに従って getter / setter を実装してください。
+
+```bash
+npm run step3
+```
+
+---
+
+### Step 3 答え合わせ
+
+```bash
+npm run answer3
 ```
