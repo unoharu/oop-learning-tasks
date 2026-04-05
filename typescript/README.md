@@ -401,3 +401,101 @@ npm run step3
 ```bash
 npm run answer3
 ```
+
+---
+
+## Step 4　TaskManagerクラスを作る
+
+### Step 4 学ぶ概念
+
+- **コンポジション** — あるクラスが別のクラスのインスタンスをプロパティとして持つ関係
+- **has-a 関係** — 「TaskManager は Task を持つ」という関係。継承の「is-a 関係」と対になる概念
+
+---
+
+### なぜ TaskManager が必要か
+
+Step 3までの `Task` クラスは1つのタスクを管理できますが、複数のタスクを扱おうとするとすぐ限界が来ます。
+
+```typescript
+const task1 = new Task("買い物", "2024-12-31");
+const task2 = new Task("読書", "2024-11-30");
+const task3 = new Task("運動", "2024-10-15");
+
+// 全タスクを表示したいだけでこうなる
+task1.display();
+task2.display();
+task3.display();
+
+// 完了済みの件数を数えるのも手動
+let count = 0;
+if (task1.completed) count++;
+if (task2.completed) count++;
+if (task3.completed) count++;
+```
+
+`TaskManager` クラスを作ることで、複数タスクへの操作を1箇所に集約できます。
+
+```typescript
+const manager = new TaskManager();
+manager.addTask(new Task("買い物", "2024-12-31"));
+manager.addTask(new Task("読書", "2024-11-30"));
+
+manager.displayAll();                        // 全タスクを表示
+console.log(manager.completedCount);         // 完了済み件数
+```
+
+---
+
+### コンポジションの構文
+
+クラスのプロパティに別クラスのインスタンスの配列を持たせます。
+
+```typescript
+class TaskManager {
+  private tasks: Task[] = []; // Task の配列を持つ（コンポジション）
+
+  addTask(task: Task): void {
+    this.tasks.push(task);
+  }
+}
+
+const manager = new TaskManager();
+manager.addTask(new Task("買い物", "2024-12-31"));
+```
+
+#### 配列操作のメソッド
+
+| メソッド | 用途 | 例 |
+| --- | --- | --- |
+| `push(item)` | 末尾に追加 | `this.tasks.push(task)` |
+| `filter(fn)` | 条件に合う要素だけの新しい配列を返す | `this.tasks.filter(t => !t.completed)` |
+| `find(fn)` | 条件に合う最初の要素を返す（なければ `undefined`） | `this.tasks.find(t => t.title === title)` |
+| `forEach(fn)` | 各要素に処理を実行する | `this.tasks.forEach(t => t.display())` |
+
+#### オプショナルチェーン `?.`
+
+`find()` は要素が見つからない場合に `undefined` を返します。`?.` を使うと `undefined` のときメソッド呼び出しをスキップできます。
+
+```typescript
+const found = manager.findTask("読書"); // Task | undefined
+found?.complete(); // found が undefined でもエラーにならない
+```
+
+---
+
+### Step 4 問題
+
+`src/step4-task-manager.ts` を開いて、TODOコメントに従って `TaskManager` クラスを実装してください。
+
+```bash
+npm run step4
+```
+
+---
+
+### Step 4 答え合わせ
+
+```bash
+npm run answer4
+```
