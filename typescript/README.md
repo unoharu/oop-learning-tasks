@@ -747,3 +747,93 @@ npm run step6
 ```bash
 npm run answer6
 ```
+
+---
+
+## Step 7　コードをSOLIDで見直す
+
+### Step 7 学ぶ概念
+
+- **SOLID原則** — 保守しやすいオブジェクト指向設計のための5つの原則
+- **リファクタリング** — 動作を変えずにコードの構造を改善すること
+
+---
+
+### SOLID 原則とは
+
+| 原則 | 正式名称 | 一言で言うと |
+| --- | --- | --- |
+| **S** | 単一責任の原則（SRP） | 1クラスの変更理由は1つだけ |
+| **O** | 開放閉鎖の原則（OCP） | 拡張に開いて、修正に閉じる |
+| **L** | リスコフの置換原則（LSP） | 親クラスの代わりにサブクラスを使っても動作が壊れない |
+| **I** | インターフェース分離の原則（ISP） | 使わないメソッドへの依存を強制しない |
+| **D** | 依存性逆転の原則（DIP） | 具体的な実装ではなく抽象（interface）に依存する |
+
+このステップでは特に重要な **S（SRP）** と **O（OCP）** を体験します。
+
+---
+
+### S：単一責任の原則（SRP）
+
+1つのクラスが持つ「変更理由」は1つであるべきという原則です。
+
+```typescript
+// 違反: TaskManager が「管理」「表示」「保存」の3つの責任を持っている
+class TaskManagerBad {
+  addTask() { ... }      // タスク管理
+  printReport() { ... }  // 表示
+  saveToFile() { ... }   // 保存
+}
+```
+
+表示の仕様が変わったとき、タスク管理のコードも入っている `TaskManagerBad` を修正するのは危険です。
+
+```typescript
+// 改善: 責任ごとにクラスを分ける
+class TaskRepository { ... } // タスク管理だけ
+class TaskReporter { ... }   // 表示だけ
+class TaskStorage { ... }    // 保存だけ
+```
+
+---
+
+### O：開放閉鎖の原則（OCP）
+
+既存のコードを修正せずに機能を拡張できる設計にする原則です。
+
+```typescript
+// 違反: 通知方法が増えるたびに notify() を修正しなければならない
+class NotifierBad {
+  notify(type: string, message: string): void {
+    if (type === "console") { ... }
+    else if (type === "email") { ... }
+    // Slack を追加するにはここを修正する必要がある
+  }
+}
+```
+
+```typescript
+// 改善: interface で契約を定義し、新しい通知方法はクラスを追加するだけ
+interface Notifiable {
+  notify(message: string): void;
+}
+class SlackNotifier implements Notifiable { ... } // 既存コードを変更しない
+```
+
+---
+
+### Step 7 問題
+
+`src/step7-solid.ts` を開いて、問題のあるコードを特定し、SRP と OCP に従ってリファクタリングしてください。
+
+```bash
+npm run step7
+```
+
+---
+
+### Step 7 答え合わせ
+
+```bash
+npm run answer7
+```

@@ -13,7 +13,9 @@
     "step5": "ts-node src/step5-inheritance.ts",
     "answer5": "ts-node answers/step5-inheritance.ts",
     "step6": "ts-node src/step6-interface.ts",
-    "answer6": "ts-node answers/step6-interface.ts"
+    "answer6": "ts-node answers/step6-interface.ts",
+    "step7": "ts-node src/step7-solid.ts",
+    "answer7": "ts-node answers/step7-solid.ts"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
