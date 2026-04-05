@@ -11,7 +11,9 @@
     "step4": "ts-node src/step4-task-manager.ts",
     "answer4": "ts-node answers/step4-task-manager.ts",
     "step5": "ts-node src/step5-inheritance.ts",
-    "answer5": "ts-node answers/step5-inheritance.ts"
+    "answer5": "ts-node answers/step5-inheritance.ts",
+    "step6": "ts-node src/step6-interface.ts",
+    "answer6": "ts-node answers/step6-interface.ts"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",

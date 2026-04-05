@@ -623,3 +623,127 @@ npm run step5
 ```bash
 npm run answer5
 ```
+
+---
+
+## Step 6　interfaceで通知機能を作る
+
+### Step 6 学ぶ概念
+
+- **interface** — 「何ができるか」だけを定義する契約。実装は持たない
+- **ポリモーフィズム** — 同じメソッド名で、クラスごとに異なる動作をさせること
+- **抽象化** — 呼び出し側が内部の詳細を知らなくてよい状態にすること
+
+---
+
+### なぜ interface が必要か
+
+通知方法が増えるたびに `Task` クラスを修正するのは壊れやすい設計です。
+
+```typescript
+// interface なし: 通知方法ごとに Task を修正しなければならない
+complete(): void {
+  this._completed = true;
+  if (notifyType === "console") {
+    console.log(`[通知] ${this.title}が完了しました`);
+  } else if (notifyType === "email") {
+    console.log(`[メール] ${this.title}が完了しました`);
+  }
+  // 通知方法が増えるたびにここを修正する必要がある
+}
+```
+
+`Notifiable` interface を定義し、通知の実装を外に出すことで `Task` クラスは通知方法を知らなくてよくなります。
+
+```typescript
+interface Notifiable {
+  notify(message: string): void;
+}
+
+// Task は「Notifiable なら何でも受け取れる」
+class Task {
+  constructor(title: string, dueDate: string, notifier?: Notifiable) {}
+
+  complete(): void {
+    this._completed = true;
+    this.notifier?.notify(`タスク「${this.title}」が完了しました`);
+    // 通知方法が増えても Task クラスは一切変更しなくてよい
+  }
+}
+```
+
+---
+
+### interface の構文
+
+```typescript
+// 定義: メソッドのシグネチャ（名前・引数・戻り値の型）だけを書く
+interface Notifiable {
+  notify(message: string): void;
+}
+
+// 実装: implements キーワードで契約を宣言する
+class ConsoleNotifier implements Notifiable {
+  notify(message: string): void {
+    console.log(`[通知] ${message}`); // 実装はクラスごとに異なってよい
+  }
+}
+
+class EmailNotifier implements Notifiable {
+  constructor(private emailAddress: string) {}
+
+  notify(message: string): void {
+    console.log(`[メール → ${this.emailAddress}] ${message}`);
+  }
+}
+```
+
+#### ポリモーフィズムの確認
+
+`Notifiable` 型の変数にはどの実装クラスでも代入できます。
+
+```typescript
+const notifiers: Notifiable[] = [
+  new ConsoleNotifier(),
+  new EmailNotifier("user@example.com"),
+];
+
+// 呼び出し側は実装の詳細を知らなくてよい
+notifiers.forEach((n) => n.notify("テスト通知"));
+// [通知] テスト通知
+// [メール → user@example.com] テスト通知
+```
+
+#### オプショナル引数 `?`
+
+コンストラクタの引数に `?` をつけると省略可能になります。
+
+```typescript
+constructor(title: string, dueDate: string, notifier?: Notifiable) {
+  this.notifier = notifier; // 省略された場合は undefined
+}
+
+// notifier あり
+new Task("買い物", "2024-12-31", new ConsoleNotifier());
+
+// notifier なし（通知不要なタスク）
+new Task("運動", "2024-10-15");
+```
+
+---
+
+### Step 6 問題
+
+`src/step6-interface.ts` を開いて、TODOコメントに従って `Notifiable` interface と各 Notifier クラスを実装してください。
+
+```bash
+npm run step6
+```
+
+---
+
+### Step 6 答え合わせ
+
+```bash
+npm run answer6
+```
