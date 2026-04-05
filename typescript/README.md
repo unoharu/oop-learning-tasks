@@ -499,3 +499,127 @@ npm run step4
 ```bash
 npm run answer4
 ```
+
+---
+
+## Step 5　継承：共通部分を親クラスへ
+
+### Step 5 学ぶ概念
+
+- **継承** — 既存のクラスの機能を引き継いで新しいクラスを作る仕組み
+- **is-a 関係** — `RegularTask` は `BaseTask` である、という親子関係
+- **super** — 親クラスのコンストラクタやメソッドを呼び出すキーワード
+- **オーバーライド** — 親クラスのメソッドをサブクラスで上書きすること
+- **abstract class** — インスタンスを直接作れない抽象クラス
+
+---
+
+### なぜ継承が必要か
+
+新しいタスク種別（繰り返しタスク）を追加するとき、継承なしだとこうなります。
+
+```typescript
+class RegularTask {
+  title: string;
+  dueDate: string;
+  private _completed: boolean = false;
+  // ...complete() / getter など Step 3 と全く同じコードが並ぶ
+}
+
+class RecurringTask {
+  title: string;
+  dueDate: string;
+  private _completed: boolean = false;
+  interval: string;
+  // ...complete() / getter なども同じコードが並ぶ
+}
+```
+
+`complete()` やプロパティ管理など共通の処理がコピーされます。修正が必要になったとき全クラスを直す必要があり、修正漏れのリスクが生まれます。
+
+継承を使うと共通部分を親クラス（`BaseTask`）に集約できます。
+
+```typescript
+abstract class BaseTask {
+  // 共通のプロパティとメソッドをここに集める
+}
+
+class RegularTask extends BaseTask {
+  // RegularTask 固有の部分だけを書く
+}
+
+class RecurringTask extends BaseTask {
+  private interval: string; // RecurringTask だけが持つプロパティ
+}
+```
+
+---
+
+### 継承の構文
+
+#### extends
+
+```typescript
+class 子クラス extends 親クラス {
+  constructor(引数) {
+    super(親クラスに渡す引数); // 必ず最初に呼ぶ
+  }
+}
+```
+
+#### abstract class と abstract メソッド
+
+```typescript
+abstract class BaseTask {
+  // 具体的な実装を持つメソッド（全サブクラスで共通）
+  complete(): void {
+    this._completed = true;
+  }
+
+  // abstract メソッド: 実装を持たず、サブクラスへの実装を強制する
+  abstract display(): void;
+}
+```
+
+`abstract class` は `new BaseTask()` で直接インスタンスを作れません。
+必ずサブクラスを経由して使います。
+
+#### abstract class と interface の違い
+
+| | abstract class | interface |
+| --- | --- | --- |
+| インスタンス化 | できない | できない |
+| 実装を持てるか | 持てる（共通処理を書ける） | 持てない（定義のみ） |
+| プロパティ | 持てる | 持てない（型定義のみ） |
+| 継承・実装 | `extends`（1つだけ） | `implements`（複数可） |
+| 使いどころ | 共通の実装を持つ基底クラス | 「何ができるか」の契約（Step 6で登場） |
+
+#### is-a 関係の確認
+
+`RegularTask extends BaseTask` であれば、`RegularTask` は `BaseTask` 型の変数に代入できます。
+
+```typescript
+const tasks: BaseTask[] = [
+  new RegularTask("買い物", "2024-12-31"),
+  new RecurringTask("運動", "2024-10-15", "毎日"),
+];
+tasks.forEach((task) => task.display()); // どちらも display() を呼べる
+```
+
+---
+
+### Step 5 問題
+
+`src/step5-inheritance.ts` を開いて、TODOコメントに従って `RegularTask` と `RecurringTask` を実装してください。
+
+```bash
+npm run step5
+```
+
+---
+
+### Step 5 答え合わせ
+
+```bash
+npm run answer5
+```

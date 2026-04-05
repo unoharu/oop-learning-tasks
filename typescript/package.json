@@ -9,7 +9,9 @@
     "step3": "ts-node src/step3-getter-setter.ts",
     "answer3": "ts-node answers/step3-getter-setter.ts",
     "step4": "ts-node src/step4-task-manager.ts",
-    "answer4": "ts-node answers/step4-task-manager.ts"
+    "answer4": "ts-node answers/step4-task-manager.ts",
+    "step5": "ts-node src/step5-inheritance.ts",
+    "answer5": "ts-node answers/step5-inheritance.ts"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
