@@ -1,0 +1,12 @@
+{
+  "name": "oop-learning-tasks-typescript",
+  "version": "1.0.0",
+  "scripts": {
+    "step1": "ts-node src/step1-task.ts",
+    "answer1": "ts-node answers/step1-task.ts"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
