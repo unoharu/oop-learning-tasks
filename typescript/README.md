@@ -196,3 +196,110 @@ npm run step1
 ```bash
 npm run answer1
 ```
+
+---
+
+## Step 2　型とアクセス修飾子を使う
+
+### 学ぶ概念
+
+- **アクセス修飾子** — プロパティやメソッドへのアクセス範囲を制限するキーワード
+- **カプセル化** — データを外部から守り、決まった方法でしか操作できないようにする設計
+
+---
+
+### なぜアクセス修飾子が必要か
+
+Step 1の `Task` クラスはプロパティが外部から自由に書き換えられます。
+
+```typescript
+const task = new Task("買い物", "2024-12-31");
+task.completed = true;  // 直接書き換えられてしまう
+task.completed = false; // 完了したはずのタスクを未完了に戻せてしまう
+```
+
+これは意図しない状態変化を招きます。アクセス修飾子でプロパティの公開範囲を制限することで、「完了状態は `complete()` メソッドでしか変えられない」というルールをコードで表現できます。
+
+---
+
+### アクセス修飾子の種類
+
+| 修飾子 | アクセスできる範囲 | 使いどころ |
+| --- | --- | --- |
+| `public` | どこからでもアクセス可能（デフォルト） | 外部に公開してよいプロパティ・メソッド |
+| `private` | クラスの内部からのみアクセス可能 | 外部から直接変更させたくないプロパティ |
+| `readonly` | 初期化後は変更不可（読み取り専用） | 作成後に変わらない値（IDなど） |
+
+```typescript
+class Task {
+  public title: string;       // 外部から読み書きできる
+  private completed: boolean; // 外部から直接変更できない
+  readonly id: number;        // 初期化後は変更できない
+
+  constructor(title: string, id: number) {
+    this.title = title;
+    this.completed = false;
+    this.id = id;
+  }
+
+  complete(): void {
+    this.completed = true; // クラス内部からは変更できる
+  }
+}
+
+const task = new Task("買い物", 1);
+task.title = "読書";      // OK: public なので変更できる
+task.complete();          // OK: メソッド経由で completed を変更できる
+// task.completed = true; // エラー: private なので直接変更できない
+// task.id = 2;           // エラー: readonly なので変更できない
+```
+
+---
+
+### 構文リファレンス
+
+#### TypeScript のショートハンド構文
+
+コンストラクタの引数に修飾子を付けると、プロパティの宣言と代入を1行で書けます。
+
+```typescript
+// 通常の書き方
+class Task {
+  public title: string;
+  private completed: boolean;
+
+  constructor(title: string) {
+    this.title = title;
+    this.completed = false;
+  }
+}
+
+// ショートハンド（同じ意味）
+class Task {
+  private completed: boolean = false;
+
+  constructor(public title: string) {}
+}
+```
+
+---
+
+### 問題
+
+`src/step2-access.ts` を開いて、TODOコメントに従って型とアクセス修飾子を追加してください。
+
+実装できたら実行して動作を確認しましょう。
+
+```bash
+npm run step2
+```
+
+---
+
+### 答え合わせ
+
+実装後に `answers/step2-access.ts` と比較してください。
+
+```bash
+npm run answer2
+```

@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "step1": "ts-node src/step1-task.ts",
-    "answer1": "ts-node answers/step1-task.ts"
+    "answer1": "ts-node answers/step1-task.ts",
+    "step2": "ts-node src/step2-access.ts",
+    "answer2": "ts-node answers/step2-access.ts"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
