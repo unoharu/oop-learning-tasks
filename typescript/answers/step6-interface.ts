@@ -16,6 +16,9 @@ interface Notifiable {
   notify(message: string): void;
 }
 
+// implements は「この interface の契約を守る」という宣言
+// extends（クラスの継承・コード共有）とは異なり、interface はコードを持てないので implements を使う
+//
 // ConsoleNotifier と EmailNotifier は全く異なる実装を持つが、
 // どちらも Notifiable を満たすため同じ型として扱える（ポリモーフィズム）
 class ConsoleNotifier implements Notifiable {

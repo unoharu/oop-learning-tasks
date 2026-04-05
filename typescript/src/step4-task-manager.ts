@@ -54,13 +54,15 @@ class Task {
 //
 //   - findTask(title: string): Task | undefined
 //       タイトルが一致する Task を返す。見つからなければ undefined を返す
-//       ヒント: this.tasks.find(...) が使える
+//       ヒント: find() は filter() と違い「最初の1件だけ」を返す
+//              見つからない場合は undefined になるため、戻り値の型が Task | undefined
 //
 //   - displayAll(): void
 //       tasks の全タスクを display() で出力する
 //
 //   - get completedCount(): number  （getter）
 //       完了済みタスクの件数を返す
+//       ヒント: Step 3 で使った get キーワードと、filter().length の組み合わせ
 //
 //   - get pendingCount(): number  （getter）
 //       未完了タスクの件数を返す

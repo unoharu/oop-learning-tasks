@@ -6,10 +6,15 @@
 
 class Task {
   // TODO: 以下の修飾子と型を付けてプロパティを定義する
-  //   - title    : 外部から読み書きできる文字列
-  //   - dueDate  : 外部から読み書きできる文字列
-  //   - completed: 外部から読み取れるが、初期化後は変更できない真偽値
+  //   - title    : 外部から読み書きできる文字列（public string）
+  //   - dueDate  : 外部から読み書きできる文字列（public string）
+  //   - completed: 外部から直接変更されたくない真偽値（private boolean）
   //   ヒント: public / private / readonly を使い分ける
+  //
+  //   ※ readonly にしたくなるかもしれないが、readonly はコンストラクタでの初期化後に
+  //      一切の代入を禁止するため、complete() メソッド内で this.completed = true と
+  //      書いたときにコンパイルエラーになる。readonly の限界を体験してみてもよい。
+  //      解決策は Step 3 で学ぶ getter / setter。
 
   constructor(title: string, dueDate: string) {
     // TODO: 受け取った引数を this に代入する

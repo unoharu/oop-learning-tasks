@@ -8,39 +8,34 @@ class Task {
   public title: string;
   public dueDate: string;
 
-  // private プロパティに _ をつけるのは「直接アクセスしないでください」という慣習
-  // getter / setter と名前が衝突しないようにするためでもある
-  private _completed: boolean;
+  // TODO: completed を private にして外部から直接変更できないようにする
+  //   慣習として private プロパティ名には _ をつける（例: _completed）
+  //   コンストラクタ内の this.completed = false も this._completed = false に変更する
+  completed: boolean;
 
   constructor(title: string, dueDate: string) {
     this.title = title;
     this.dueDate = dueDate;
-    this._completed = false;
+    this.completed = false;
   }
 
-  // getter: _completed を外部に公開する読み取り専用の窓口
-  // task.completed と書くだけでアクセスでき、呼び出し側はメソッドと意識しなくてよい
-  get completed(): boolean {
-    return this._completed;
-  }
+  // TODO: completed の getter を実装する
+  //   - get completed(): boolean { ... } の形で書く
+  //   - _completed の値をそのまま返す
 
-  // setter: 外部からの書き込みをバリデーションで守る
-  // 「完了 → 未完了」への変更を禁止することで、タスクの状態が逆戻りしない保証を持てる
-  set completed(value: boolean) {
-    if (this._completed && !value) {
-      throw new Error("完了済みのタスクを未完了に戻すことはできません");
-    }
-    this._completed = value;
-  }
+  // TODO: completed の setter を実装する
+  //   - set completed(value: boolean) { ... } の形で書く
+  //   - 「すでに完了済み（_completed が true）なのに false に戻そうとしている」場合はエラーをスローする
+  //   - エラー文言: "完了済みのタスクを未完了に戻すことはできません"
+  //   - 条件を通過した場合は _completed に value を代入する
+  //   ヒント: throw new Error("...") でエラーをスローできる
 
-  // getter はプロパティのように見えるが、呼ばれるたびに計算できる
-  // 将来タスクにサブタスクが増えても、この getter だけ修正すれば呼び出し側は変わらない
-  get completionRate(): number {
-    return this._completed ? 100 : 0;
-  }
+  // TODO: 完了率を返す getter を実装する
+  //   - get completionRate(): number { ... } の形で書く
+  //   - 完了していれば 100、未完了なら 0 を返す
 
   display(): void {
-    const status = this._completed ? "完了" : "未完了";
+    const status = this.completed ? "完了" : "未完了";
     console.log(`[${status}] ${this.title}（期日: ${this.dueDate}）完了率: ${this.completionRate}%`);
   }
 }

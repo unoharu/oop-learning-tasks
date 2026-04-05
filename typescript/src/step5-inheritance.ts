@@ -35,12 +35,14 @@ abstract class BaseTask {
 // TODO: RegularTask クラスを実装する
 //   - BaseTask を継承する（extends を使う）
 //   - コンストラクタで title と dueDate を受け取り、super() で親クラスに渡す
+//     ヒント: super() はコンストラクタの先頭で必ず呼ぶ必要がある
+//             親クラスの constructor(title, dueDate) と同じ引数を渡す
 //   - display() を実装する
 //     出力例: [未完了] 買い物（期日: 2024-12-31）
 
 // TODO: RecurringTask クラスを実装する
 //   - BaseTask を継承する
-//   - "毎日" / "毎週" / "毎月" などの繰り返し間隔（interval）を追加プロパティとして持つ
+//   - interval: string 型のプロパティを追加（"毎日" / "毎週" / "毎月" など）
 //   - コンストラクタで title / dueDate / interval を受け取る
 //   - display() を実装する
 //     出力例: [未完了] 運動（期日: 2024-10-15）【繰り返し: 毎日】

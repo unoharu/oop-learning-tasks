@@ -12,6 +12,11 @@
 // abstract class: インスタンスを直接作れないクラス
 // 「BaseTask として new BaseTask() はできないが、共通の実装を持てる」という使い方をする
 // interface との違い: abstract class はプロパティや具体的なメソッドの実装も持てる
+//
+// なぜ interface ではなく abstract class か:
+//   complete() など「全サブクラスで共通の実装」をここに持たせたいため。
+//   interface は実装を持てないので、共通実装が必要な場合は abstract class を選ぶ。
+//   もし共通実装が不要で「契約だけ」ならば interface で十分だった。
 abstract class BaseTask {
   public dueDate: string;
   private _completed: boolean = false;

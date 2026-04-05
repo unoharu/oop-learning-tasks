@@ -6,14 +6,16 @@
 
 // TODO: Notifiable interface を定義する
 //   - notify(message: string): void メソッドを持つ
+//   ヒント: interface の構文は README の「Step 6 構文リファレンス」を参照
 
 // TODO: ConsoleNotifier クラスを実装する
-//   - Notifiable を implements する
+//   - Notifiable interface を実装する（class 宣言に implements Notifiable を付ける）
+//     implements を付けると notify() の実装を TypeScript が強制してくれる
 //   - notify() でメッセージをコンソールに出力する
 //     出力例: [通知] タスク「買い物」が完了しました
 
 // TODO: EmailNotifier クラスを実装する
-//   - Notifiable を implements する
+//   - Notifiable interface を実装する（ConsoleNotifier と同じく implements を使う）
 //   - コンストラクタで送信先メールアドレス（emailAddress）を受け取る
 //   - notify() でメール送信を模したメッセージをコンソールに出力する
 //     出力例: [メール → user@example.com] タスク「買い物」が完了しました
@@ -24,8 +26,9 @@ class Task {
   public title: string;
   public dueDate: string;
   private _completed: boolean = false;
-  // TODO: notifier プロパティを追加する（型は Notifiable）
-  //   コンストラクタで受け取れるようにする（省略可能にする: Notifiable | undefined）
+  // TODO: notifier プロパティを追加し、コンストラクタの引数に加える（省略可能）
+  //   - 型は Notifiable | undefined（省略時は undefined になる）
+  //   - 引数に ? を付けると省略可能になる。例: notifier?: Notifiable
 
   constructor(title: string, dueDate: string) {
     this.title = title;

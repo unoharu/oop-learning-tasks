@@ -88,6 +88,8 @@ completeTask(task);
 displayTask(task); // [完了] 買い物（期日: 2024-12-31）
 ```
 
+> **補足**: ここで使っている `{ ... }` は **オブジェクトリテラル**と呼ばれるJavaScriptのデータ構造です。OOPで「オブジェクト」というときは「クラスから `new` で作った実体（インスタンス）」を指します。同じ「オブジェクト」という言葉が2つの意味で使われているので注意してください。
+
 タスクが増えるたびに `completeTask(task1)` `completeTask(task2)` と関数を呼び出す必要があり、
 データと処理がバラバラで管理しにくくなります。
 
@@ -308,6 +310,16 @@ npm run answer2
 
 ## Step 3　getter / setter を実装する
 
+### Step 2 から Step 3 へ — なぜ getter / setter が必要になるのか
+
+Step 2 で `completed` を `private` にしたことで、外部からの不正な書き換えを防げるようになりました。しかし同時に、外部から値を「読む」こともできなくなりました（`task.completed` がコンパイルエラーになる）。
+
+「では `readonly` にすれば読み取れるのでは？」と思うかもしれません。試してみると、今度は `complete()` メソッドの中で `this.completed = true` と書いた瞬間にコンパイルエラーになります。`readonly` は「コンストラクタでの初期化後は誰も変更できない」という意味だからです — クラス内部からの変更も禁止されます。
+
+この問題を解決するのが **getter / setter** と `_` プレフィックスの組み合わせです。「外部からは読み取り専用で公開しつつ、クラス内部からは制御した書き込みができる」状態を実現します。
+
+---
+
 ### Step 3 学ぶ概念
 
 - **getter** — プロパティのように見えるが、呼ばれるたびに値を計算して返せる読み取り専用の窓口
@@ -390,8 +402,17 @@ try {
 
 `src/step3-getter-setter.ts` を開いて、TODOコメントに従って getter / setter を実装してください。
 
+実装できたら実行して動作を確認しましょう。
+
 ```bash
 npm run step3
+```
+
+期待される出力：
+
+```text
+[未完了] 買い物（期日: 2024-12-31）完了率: 0%
+[完了] 買い物（期日: 2024-12-31）完了率: 100%
 ```
 
 ---
@@ -473,6 +494,8 @@ manager.addTask(new Task("買い物", "2024-12-31"));
 | `find(fn)` | 条件に合う最初の要素を返す（なければ `undefined`） | `this.tasks.find(t => t.title === title)` |
 | `forEach(fn)` | 各要素に処理を実行する | `this.tasks.forEach(t => t.display())` |
 
+**`filter` と `find` の違い**：`filter` は条件に合う要素すべてを新しい配列として返します。`removeTask` では「削除したいタスク**以外**」で配列を作り直すことで削除を実現します（`this.tasks = this.tasks.filter(...)`）。一方 `find` は最初に一致した要素を1件だけ返します。見つからなければ `undefined` を返すため、戻り値の型が `Task | undefined` になります。
+
 #### オプショナルチェーン `?.`
 
 `find()` は要素が見つからない場合に `undefined` を返します。`?.` を使うと `undefined` のときメソッド呼び出しをスキップできます。
@@ -552,6 +575,8 @@ class RecurringTask extends BaseTask {
   private interval: string; // RecurringTask だけが持つプロパティ
 }
 ```
+
+**なぜ通常のクラスではなく `abstract class` を使うのか**：通常のクラスでも継承はできますが、`new BaseTask()` と書くと実装の不完全な親クラスを直接インスタンス化できてしまいます。`abstract class` にすると直接のインスタンス化を禁止できます。また `abstract display()` と書くことで、サブクラスが `display()` を実装していない場合にコンパイルエラーになります。「実装の強制」をコードで表現できます。
 
 ---
 
@@ -734,7 +759,15 @@ new Task("運動", "2024-10-15");
 
 ### Step 6 問題
 
-`src/step6-interface.ts` を開いて、TODOコメントに従って `Notifiable` interface と各 Notifier クラスを実装してください。
+このステップでは、以下の3つの作業をします：
+
+1. `Notifiable` interface を定義する
+2. `ConsoleNotifier` と `EmailNotifier` の2クラスを実装する
+3. 既存の `Task` クラスに `notifier` プロパティを追加し、`complete()` 内で通知を呼び出す
+
+この3つが揃って初めて「通知方法を知らずに通知を送れる」ポリモーフィズムが動きます。
+
+`src/step6-interface.ts` を開いて、TODOコメントに従って実装してください。
 
 ```bash
 npm run step6

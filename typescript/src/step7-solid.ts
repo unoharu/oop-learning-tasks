@@ -17,6 +17,8 @@
 
 // TODO: 以下の TaskManager は「タスク管理」「表示」「ファイル保存」を1つのクラスで担っている
 //   どこが SRP に違反しているか考え、責任ごとにクラスを分割してリファクタリングしてください
+//   視点: 「表示フォーマットが変わったとき」「保存先が変わったとき」「タスクの管理ロジックが変わったとき」
+//         それぞれ別のクラスだけ修正すれば済むように分ける（3クラスに分割）
 
 class TaskManagerBad {
   private tasks: { title: string; completed: boolean }[] = [];
@@ -52,7 +54,8 @@ class TaskManagerBad {
 // -----------------------------------------------------------------------
 
 // TODO: 以下の Notifier は通知方法が増えるたびに notify() を修正しなければならない
-//   Step 6 で学んだ interface を使って OCP に従った設計にリファクタリングしてください
+//   Step 6 で Notifiable interface を使って通知を拡張した設計を思い出してください
+//   同じ考え方で: 通知方法が増えるたびに既存のクラスを修正しなくて済む構造にする
 
 class NotifierBad {
   notify(type: string, message: string): void {

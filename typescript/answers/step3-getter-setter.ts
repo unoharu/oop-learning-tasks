@@ -32,6 +32,7 @@ class Task {
   // setter: 外部からの書き込みをバリデーションで守る
   // 「完了 → 未完了」への変更を禁止することで、タスクの状態が逆戻りしない保証を持てる
   set completed(value: boolean) {
+    // 「すでに完了済み（_completed === true）かつ false に戻そうとしている（!value === true）」場合のみエラー
     if (this._completed && !value) {
       throw new Error("完了済みのタスクを未完了に戻すことはできません");
     }
