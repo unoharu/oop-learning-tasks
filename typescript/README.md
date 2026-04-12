@@ -507,6 +507,43 @@ found?.complete(); // found が undefined でもエラーにならない
 
 ---
 
+### Step 4 クラス関係図
+
+```
+TaskManager
+└── tasks: Task[]   ← has-a 関係（コンポジション）
+         │
+         └─ addTask() / removeTask() / findTask() / displayAll()
+```
+
+TaskManager は Task を「持つ」。`new TaskManager()` → 内部に `Task[]` を保持。
+
+---
+
+### Step 4 よくある間違い
+
+**配列に直接アクセスする**
+
+```typescript
+// NG: tasks を public にして外部から操作する
+manager.tasks.push(task);
+manager.tasks = [];
+```
+
+`tasks` を `private` にして操作をメソッド経由に限定することで、「どんな状態でも TaskManager の内部が一貫している」という保証が得られます。
+
+**removeTask が splice でインデックス操作になる**
+
+```typescript
+// NG: インデックスを手動で管理する（バグになりやすい）
+const index = this.tasks.findIndex(t => t.title === title);
+this.tasks.splice(index, 1); // index が -1 のとき最後の要素を消す
+```
+
+`filter` で「削除したい要素以外」の配列を作り直す方が安全で意図が明確です。
+
+---
+
 ### Step 4 問題
 
 `src/step4-task-manager.ts` を開いて、TODOコメントに従って `TaskManager` クラスを実装してください。
@@ -630,6 +667,42 @@ const tasks: BaseTask[] = [
 ];
 tasks.forEach((task) => task.display()); // どちらも display() を呼べる
 ```
+
+---
+
+### Step 5 クラス関係図
+
+```
+        BaseTask (abstract)
+       /                   \
+RegularTask           RecurringTask
+  display()             interval: string
+                        display()
+```
+
+`extends` で矢印の方向に「is-a 関係」が生まれる。
+`BaseTask` 型の変数に `RegularTask` も `RecurringTask` も代入できる。
+
+---
+
+### Step 5 よくある間違い
+
+**コードの再利用だけを目的に継承を使う**
+
+```typescript
+// NG: EmailNotifier と ConsoleNotifier に共通コードがあるからといって継承する
+class EmailNotifier extends ConsoleNotifier {
+  // ...
+}
+```
+
+「is-a 関係か？」を問いかけてください。`EmailNotifier` は `ConsoleNotifier` **ではありません**。
+共通コードを再利用したいだけなら、継承ではなく関数やコンポジションを使います。
+
+**abstract でないクラスを基底クラスにする**
+
+`abstract class` にすれば `new BaseTask()` を TypeScript が禁止します。
+普通のクラスでは直接インスタンス化できてしまうため、意図が伝わりにくくなります。
 
 ---
 
@@ -757,6 +830,47 @@ new Task("運動", "2024-10-15");
 
 ---
 
+### Step 6 クラス関係図
+
+```
+«interface» Notifiable
+    notify(message): void
+          ↑               ↑
+ConsoleNotifier     EmailNotifier
+(implements)        (implements)
+
+Task ──uses──→ Notifiable
+```
+
+`Task` は `Notifiable` に依存しているが、`ConsoleNotifier` や `EmailNotifier` を直接知らない。
+新しい通知方法を追加しても `Task` クラスを変更する必要がない。
+
+---
+
+### Step 6 よくある間違い
+
+**1回しか実装しない interface を定義する**
+
+```typescript
+// NG: ConsoleNotifier しか実装しないのに interface を作る
+interface Logger {
+  log(message: string): void;
+}
+class ConsoleLogger implements Logger { ... }
+```
+
+interface は「複数の実装が存在する、または将来追加される」ときに価値を持ちます。
+1つしか実装しないなら、最初はクラスだけで十分です。
+
+**Step 5 との混乱: extends vs implements**
+
+- `extends`（継承）: 親クラスのコードを引き継ぐ。is-a 関係。
+- `implements`（interface の実装）: 契約を宣言するだけ。コードは引き継がない。
+
+`ConsoleNotifier extends EmailNotifier` ではなく `implements Notifiable` を使うことで、「通知できる」という能力だけを宣言します。
+
+---
+
 ### Step 6 問題
 
 このステップでは、以下の3つの作業をします：
@@ -802,7 +916,7 @@ npm run answer6
 | **I** | インターフェース分離の原則（ISP） | 使わないメソッドへの依存を強制しない |
 | **D** | 依存性逆転の原則（DIP） | 具体的な実装ではなく抽象（interface）に依存する |
 
-このステップでは特に重要な **S（SRP）** と **O（OCP）** を体験します。
+このステップでは S・O をコードで体験し、L・I・D も演習として実装します。
 
 ---
 
@@ -855,9 +969,111 @@ class SlackNotifier implements Notifiable { ... } // 既存コードを変更し
 
 ---
 
+### L：リスコフの置換原則（LSP）
+
+親クラスの代わりにサブクラスを使っても動作が壊れないという原則です。
+
+```typescript
+// 違反: Penguin は Bird のサブクラスだが fly() で例外を投げる
+class BirdBad {
+  fly(): void { console.log("羽ばたく") }
+}
+class PenguinBad extends BirdBad {
+  fly(): void { throw new Error("飛べません") } // Bird 型として扱うとクラッシュ
+}
+
+// 改善: 「飛べる」という能力を interface に切り出す
+interface Flyable { fly(): void }
+class Bird { eat(): void { ... } }
+class Sparrow extends Bird implements Flyable { fly(): void { ... } }
+class Penguin extends Bird { swim(): void { ... } } // Flyable を持たない
+```
+
+---
+
+### I：インターフェース分離の原則（ISP）
+
+使わないメソッドへの依存を強制しない原則です。
+
+```typescript
+// 違反: 表示クラスが add() や save() も実装しなければならない
+interface TaskOperationsBad {
+  add(title: string): void;
+  getAll(): Task[];
+  report(): void; // ← 表示クラス専用なのに全クラスが実装を強制される
+  save(): void;   // ← 保存クラス専用
+}
+
+// 改善: 役割ごとに interface を分割する
+interface TaskMutable   { add(title: string): void; getAll(): Task[]; }
+interface TaskReportable { report(tasks: Task[]): void; }
+interface TaskPersistable { save(tasks: Task[]): void; }
+```
+
+---
+
+### D：依存性逆転の原則（DIP）
+
+高レベルモジュールが低レベルの具体クラスに依存しない原則です。
+
+```typescript
+// 違反: TaskManager が ConsoleNotifier に直接依存している
+class NotifyingTaskManagerBad {
+  private notifier = new ConsoleNotifier(); // ← 具体クラスへの依存
+}
+
+// 改善: interface に依存させ、具体クラスは外から注入する（依存性の注入）
+class NotifyingTaskManager {
+  constructor(private notifier: Notifiable) {} // ← interface への依存
+}
+
+// 使う側が通知方法を選べる
+new NotifyingTaskManager(new ConsoleNotifier());
+new NotifyingTaskManager(new SlackNotifier()); // TaskManager は変更不要
+```
+
+---
+
+### Step 7 クラス関係図
+
+SRP 改善後：
+
+```text
+TaskRepository   TaskReporter   TaskStorage
+(管理のみ)        (表示のみ)      (保存のみ)
+```
+
+OCP + DIP 改善後：
+
+```text
+«interface» Notifiable
+    ├── ConsoleNotifier
+    ├── EmailNotifier
+    └── SlackNotifier  ← 追加しても既存コードは変わらない
+
+NotifyingTaskManager --> Notifiable（interface に依存）
+                      （具体クラスである ConsoleNotifier に直接依存しない）
+```
+
+---
+
+### Step 7 よくある間違い
+
+#### 責任を細かく分けすぎる
+
+SRP は「1クラス1責任」ですが、「1クラス1メソッド」ではありません。
+変更理由が同じなら同じクラスに置いて構いません。過度な分割は逆に複雑さを増します。
+
+#### SOLID をすべて同時に適用しようとする
+
+実際の開発では「まず動くコードを書き、不便を感じた箇所だけ適用する」のが現実的です。
+SOLID は設計のガイドラインであり、最初から完璧な設計を目指す必要はありません。
+
+---
+
 ### Step 7 問題
 
-`src/step7-solid.ts` を開いて、問題のあるコードを特定し、SRP と OCP に従ってリファクタリングしてください。
+`src/step7-solid.ts` を開いて、問題のあるコードを特定し、全5原則（S・O・L・I・D）に従ってリファクタリングしてください。
 
 ```bash
 npm run step7

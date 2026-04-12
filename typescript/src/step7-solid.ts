@@ -69,6 +69,74 @@ class NotifierBad {
 }
 
 // -----------------------------------------------------------------------
+// 問題 3: リスコフの置換原則（LSP）違反
+// 親クラスの代わりにサブクラスを使うと動作が壊れる
+// -----------------------------------------------------------------------
+
+// TODO: 以下の PenguinBad は BirdBad を継承しているが、fly() で例外を投げる
+//   これはリスコフの置換原則に違反している
+//   BirdBad 型として使おうとすると例外が発生し、呼び出し側が安全に扱えない
+//
+//   視点: 「BirdBad 型の配列を forEach で fly() してもクラッシュしない」構造にするには？
+//   ヒント: fly() を BirdBad から切り出し、飛べる鳥だけが implements する interface にする
+
+class BirdBad {
+  fly(): void {
+    console.log("羽ばたいて飛ぶ");
+  }
+}
+
+class PenguinBad extends BirdBad {
+  fly(): void {
+    throw new Error("ペンギンは飛べません"); // LSP 違反: 親クラスの期待を破っている
+  }
+}
+
+// -----------------------------------------------------------------------
+// 問題 4: インターフェース分離の原則（ISP）違反
+// 実装クラスが使わないメソッドへの依存を強制されている
+// -----------------------------------------------------------------------
+
+// TODO: 以下の TaskOperationsBad interface は「追加」「取得」「表示」「保存」を1つに詰め込んでいる
+//   表示だけを担うクラスが add() や save() も実装しなければならなくなる
+//
+//   視点: 「必要なメソッドだけを implements できる」interface に分割するには？
+//   ヒント: 3つの interface に分割する（追加・取得 / 表示 / 保存）
+
+interface TaskOperationsBad {
+  add(title: string): void;
+  getAll(): { title: string; completed: boolean }[];
+  report(): void; // 表示の責任（別クラスに分けるべき）
+  save(): void; // 保存の責任（別クラスに分けるべき）
+}
+
+// -----------------------------------------------------------------------
+// 問題 5: 依存性逆転の原則（DIP）違反
+// 高レベルモジュールが具体クラスに直接依存している
+// -----------------------------------------------------------------------
+
+// TODO: 以下の NotifyingTaskManagerBad は ConsoleNotifier に直接依存している
+//   通知方法を EmailNotifier に変えたいとき、このクラス自体を修正しなければならない
+//
+//   視点: 「通知方法が変わってもこのクラスを変更しなくて済む」構造にするには？
+//   ヒント: Notifiable interface に依存させ、コンストラクタで外部から notifier を受け取る（依存性の注入）
+
+class ConcreteConsoleNotifier {
+  notify(message: string): void {
+    console.log(`[通知] ${message}`);
+  }
+}
+
+class NotifyingTaskManagerBad {
+  private notifier = new ConcreteConsoleNotifier(); // 具体クラスへの依存（DIP 違反）
+
+  completeTask(title: string): void {
+    console.log(`タスク「${title}」を完了にします`);
+    this.notifier.notify(`タスク「${title}」が完了しました`);
+  }
+}
+
+// -----------------------------------------------------------------------
 // 動作確認（リファクタリング後に書き換えてください）
 // -----------------------------------------------------------------------
 
@@ -84,5 +152,19 @@ manager.saveToFile();
 const notifier = new NotifierBad();
 notifier.notify("console", "タスクが完了しました");
 notifier.notify("email", "タスクが完了しました");
+
+// LSP のリファクタリング確認
+const birds: BirdBad[] = [new BirdBad(), new PenguinBad()];
+try {
+  birds.forEach((b) => b.fly()); // PenguinBad でクラッシュする
+} catch (e) {
+  console.log(`LSP 違反: ${(e as Error).message}`);
+}
+
+// DIP 違反の確認
+const badTaskManager = new NotifyingTaskManagerBad();
+badTaskManager.completeTask("買い物");
+
+// ISP の動作確認はリファクタリング後に追加してください
 
 export {};

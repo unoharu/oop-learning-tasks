@@ -93,6 +93,78 @@ class SlackNotifier implements Notifiable {
 }
 
 // -----------------------------------------------------------------------
+// 問題 3 の改善: リスコフの置換原則（LSP）
+// -----------------------------------------------------------------------
+
+// 「飛べる」という能力を interface に切り出す
+// Bird 型として扱う文脈では fly() を呼ばないため、Penguin が Bird を壊さない
+interface Flyable {
+  fly(): void;
+}
+
+class Bird {
+  // 飛べるかどうかは Bird の責任ではなく、Flyable という能力の問題
+  eat(): void {
+    console.log("食事をする");
+  }
+}
+
+// 飛べる鳥だけが Flyable を implements する
+class Sparrow extends Bird implements Flyable {
+  fly(): void {
+    console.log("羽ばたいて飛ぶ");
+  }
+}
+
+// Penguin は Flyable を implements しないため fly() を呼ばれる心配がない
+// Bird 型として扱っても動作が壊れない（LSP を満たす）
+class Penguin extends Bird {
+  swim(): void {
+    console.log("泳ぐ");
+  }
+}
+
+// -----------------------------------------------------------------------
+// 問題 4 の改善: インターフェース分離の原則（ISP）
+// -----------------------------------------------------------------------
+
+// 役割ごとに interface を分割する
+// 各クラスは必要な interface だけを implements すればよい
+interface TaskMutable {
+  add(title: string): void;
+  getAll(): Task[];
+}
+
+interface TaskReportable {
+  report(tasks: Task[]): void;
+}
+
+interface TaskPersistable {
+  save(tasks: Task[]): void;
+}
+
+// TaskRepository は TaskMutable だけを満たす（表示・保存を知らなくてよい）
+// TaskReporter は TaskReportable だけを満たす（追加・保存を知らなくてよい）
+// TaskStorage は TaskPersistable だけを満たす（追加・表示を知らなくてよい）
+
+// -----------------------------------------------------------------------
+// 問題 5 の改善: 依存性逆転の原則（DIP）
+// -----------------------------------------------------------------------
+
+// 高レベルモジュール（タスク管理）が低レベルモジュール（通知方法）に依存しない
+// Notifiable interface（抽象）に依存させ、具体クラスはコンストラクタで注入する
+class NotifyingTaskManager {
+  // 具体クラスではなく interface に依存する
+  constructor(private notifier: Notifiable) {}
+
+  completeTask(title: string): void {
+    console.log(`タスク「${title}」を完了にします`);
+    // 通知方法が何であるかを知らなくてよい。notifier に委ねるだけ
+    this.notifier.notify(`タスク「${title}」が完了しました`);
+  }
+}
+
+// -----------------------------------------------------------------------
 // 動作確認
 // -----------------------------------------------------------------------
 
@@ -117,5 +189,22 @@ const notifiers: Notifiable[] = [
   new SlackNotifier(), // 新しい通知方法を追加しても他のクラスは変更不要
 ];
 notifiers.forEach((n) => n.notify("タスクが完了しました"));
+
+console.log("");
+
+// LSP の確認: Bird 型として扱っても動作が壊れない
+const birds: Bird[] = [new Sparrow(), new Penguin()];
+birds.forEach((b) => b.eat()); // どちらも eat() は実行できる
+const flyingBirds: Flyable[] = [new Sparrow()]; // 飛べる鳥だけが Flyable に入る
+flyingBirds.forEach((b) => b.fly());
+
+console.log("");
+
+// DIP の確認: 通知方法をコンストラクタで差し替えられる
+const taskManagerWithConsole = new NotifyingTaskManager(new ConsoleNotifier());
+taskManagerWithConsole.completeTask("買い物");
+
+const taskManagerWithSlack = new NotifyingTaskManager(new SlackNotifier());
+taskManagerWithSlack.completeTask("読書");
 
 export {};
